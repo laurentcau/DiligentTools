@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
  */
 
 #include "pch.h"
-#include "DepthStencilStateParser.h"
+#include "DepthStencilStateDescParser.h"
 
 namespace std 
 {
@@ -31,8 +31,6 @@ namespace std
 
 namespace Diligent
 {
-    const Char* DepthStencilStateParser::DepthStencilStateLibName = "DepthStencilState";
-
     template<>
     class MemberBinder<StencilOpDesc> : public MemberBinderBase
     {
@@ -77,51 +75,29 @@ namespace Diligent
         EnumMapping < STENCIL_OP > m_StencilOpEnumMapping;
     };
 
-    DepthStencilStateParser::DepthStencilStateParser( IRenderDevice *pRenderDevice, lua_State *L ) :
-        EngineObjectParserCommon<IDepthStencilState>( pRenderDevice, L, DepthStencilStateLibName ),
-        m_SetDepthStencilBinding( this, L, "Context", "SetDepthStencilState", &DepthStencilStateParser::SetDepthStencilState )
+    MemberBinder<DepthStencilStateDesc>::MemberBinder( size_t MemberOffset, size_t Dummy ) :
+            MemberBinderBase( MemberOffset )
     {
-        DEFINE_BUFFERED_STRING_BINDER( m_Bindings, SDSSDescWrapper, Name, NameBuffer )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, DepthEnable, Bool, Validator<Bool>() )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, DepthWriteEnable, Bool, Validator<Bool>() )
+        DEFINE_ENUM_BINDER( m_Bindings, DepthStencilStateDesc, DepthFunc, COMPARISON_FUNCTION, m_CmpFuncEnumMapping )
 
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, DepthEnable, Bool, Validator<Bool>() )
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, DepthWriteEnable, Bool, Validator<Bool>() )
-        DEFINE_ENUM_BINDER( m_Bindings, SDSSDescWrapper, DepthFunc, COMPARISON_FUNCTION, m_CmpFuncEnumMapping )
-
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, StencilEnable, Bool, Validator<Bool>() )
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, StencilReadMask, Uint8, Validator<Uint8>() )
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, StencilWriteMask, Uint8, Validator<Uint8>() )
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, FrontFace, StencilOpDesc, 0 )
-        DEFINE_BINDER( m_Bindings, SDSSDescWrapper, BackFace, StencilOpDesc, 0 )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, StencilEnable, Bool, Validator<Bool>() )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, StencilReadMask, Uint8, Validator<Uint8>() )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, StencilWriteMask, Uint8, Validator<Uint8>() )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, FrontFace, StencilOpDesc, 0 )
+        DEFINE_BINDER( m_Bindings, DepthStencilStateDesc, BackFace, StencilOpDesc, 0 )
     };
 
-    void DepthStencilStateParser::CreateObj( lua_State *L )
+    void MemberBinder<DepthStencilStateDesc> ::GetValue(lua_State *L, const void* pBasePointer)
     {
-        INIT_LUA_STACK_TRACKING( L );
-
-        SDSSDescWrapper DepthStencilDesc;
-        ParseLuaTable( L, 1, &DepthStencilDesc, m_Bindings );
-
-        CHECK_LUA_STACK_HEIGHT();
-
-        auto ppDepthStencilState = reinterpret_cast<IDepthStencilState**>(lua_newuserdata( L, sizeof( IDepthStencilState* ) ));
-        *ppDepthStencilState = nullptr;
-        m_pRenderDevice->CreateDepthStencilState( DepthStencilDesc, ppDepthStencilState );
-        if( *ppDepthStencilState == nullptr )
-            SCRIPT_PARSING_ERROR(L, "Failed to create depth stencil state")
-
-        CHECK_LUA_STACK_HEIGHT( +1 );
+        const auto &DSSDesc = GetMemberByOffest< DepthStencilStateDesc >(pBasePointer, m_MemberOffset);
+        PushLuaTable(L, &DSSDesc, m_Bindings);
     }
 
-    int DepthStencilStateParser::SetDepthStencilState( lua_State *L )
+    void MemberBinder<DepthStencilStateDesc> ::SetValue(lua_State *L, int Index, void* pBasePointer)
     {
-        auto pVertDesc = *GetUserData<IDepthStencilState**>( L, 1, m_MetatableRegistryName.c_str() );
-        Uint8 StencilRef = 0;
-        if( lua_gettop( L ) > 1 )
-        {
-            StencilRef = ReadValueFromLua<Uint8>( L, 2 );
-        }
-        auto *pContext = LoadDeviceContextFromRegistry( L );
-        pContext->SetDepthStencilState( pVertDesc, StencilRef );
-        return 0;
+        auto &DSSDesc = GetMemberByOffest< DepthStencilStateDesc>( pBasePointer, m_MemberOffset );
+        ParseLuaTable( L, Index, &DSSDesc, m_Bindings );
     }
 }

@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,31 +25,27 @@
 
 #include "LuaWrappers.h"
 #include "LuaBindings.h"
-#include "EngineObjectParserCommon.h"
-#include "ClassMethodBinding.h"
+
+namespace std 
+{
+    DEFINE_ENUM_HASH( Diligent::LayoutElement::FREQUENCY )
+}
 
 namespace Diligent
 {
-    class LayoutDescParser : public EngineObjectParserCommon<IVertexDescription>
+    template<>
+    class MemberBinder<InputLayoutDesc> : public MemberBinderBase
     {
     public:
-        LayoutDescParser( IRenderDevice *pRenderDevice, lua_State *L );
-        static const Char* LayoutDescLibName;
-
-    protected:
-        virtual void CreateObj( lua_State *L );
-   
+        MemberBinder( size_t InputLayoutOffset, size_t ElementsBufferOffset );
+        virtual void GetValue( lua_State *L, const void* pBasePointer )override;
+        virtual void SetValue( lua_State *L, int Index, void* pBasePointer )override;
+    
     private:
-        // LayoutDesc structure does not provide storage for the Name field,
-        // nor does it provide storage for layout elements.
-        // We need to use LayoutDescWrapper to be able to store the data.
-        struct LayoutDescWrapper : ObjectDescWrapper < LayoutDesc >
-        {
-            std::vector<LayoutElement> ElementsBuffer;
-        };
-
-
-        int SetInputLayout( lua_State *L );
-        ClassMethodCaller<LayoutDescParser> m_SetInputLayoutBinding;
+        BindingsMapType m_Bindings;
+        ValueTypeEnumMapping m_ValueTypeEnumMapping;
+        EnumMapping < LayoutElement::FREQUENCY > m_FrequencyEnumMapping;
+        size_t m_LayoutElementsBufferOffset;
     };
+
 }

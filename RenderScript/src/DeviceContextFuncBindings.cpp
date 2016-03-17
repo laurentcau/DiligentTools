@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,14 +26,21 @@
 #include "GraphicsUtilities.h"
 #include "TextureViewParser.h"
 #include "EngineObjectParserBase.h"
+#include "ShaderResourceBindingParser.h"
 
 namespace Diligent
 {
-    DeviceContextFuncBindings::DeviceContextFuncBindings( IRenderDevice *pRenderDevice, lua_State *L, TextureViewParser *pTexViewPasrser ) :
+    DeviceContextFuncBindings::DeviceContextFuncBindings( IRenderDevice *pRenderDevice, lua_State *L, 
+                                                          TextureViewParser *pTexViewPasrser, 
+                                                          ShaderResourceBindingParser *pSRBParser ) :
         m_SetRenderTargetsBinding(this, L, "Context", "SetRenderTargets", &DeviceContextFuncBindings::SetRenderTargets),
         m_ClearRenderTargetBinding(this, L, "Context", "ClearRenderTarget", &DeviceContextFuncBindings::ClearRenderTarget),
         m_ClearDepthStencilBinding(this, L, "Context", "ClearDepthStencil", &DeviceContextFuncBindings::ClearDepthStencil),
-        m_TexViewMetatableName( pTexViewPasrser->GetMetatableName() )
+        m_SetStencilRefBinding(this, L, "Context", "SetStencilRef", &DeviceContextFuncBindings::SetStencilRef),
+        m_SetBlendFactorsBinding(this, L, "Context", "SetBlendFactors", &DeviceContextFuncBindings::SetBlendFactors),
+        m_CommitShaderResourcesBinding(this, L, "Context", "CommitShaderResources", &DeviceContextFuncBindings::CommitShaderResources),
+        m_TexViewMetatableName( pTexViewPasrser->GetMetatableName() ),
+        m_ShaderResBindingMetatableName( pSRBParser->GetMetatableName() )
     {
     };
 
@@ -139,6 +146,56 @@ namespace Diligent
 
         auto *pContext = EngineObjectParserBase::LoadDeviceContextFromRegistry( L );
         pContext->ClearDepthStencil( pView, ClearFlags, fDepth, Stencil );
+
+        return 0;
+    }
+
+    int DeviceContextFuncBindings::SetStencilRef( lua_State *L )
+    {
+        auto NumArgs = lua_gettop( L );
+
+        Uint32 StencilRef = 0;
+        if(NumArgs >= 1 )
+            StencilRef = ReadValueFromLua<Uint32>( L, 1 );
+
+        auto *pContext = EngineObjectParserBase::LoadDeviceContextFromRegistry( L );
+        pContext->SetStencilRef( StencilRef );
+
+        // Return no values to Lua
+        return 0;
+    }
+
+    int DeviceContextFuncBindings::SetBlendFactors( lua_State *L )
+    {
+        float BlendFactors[4] = {};
+        auto NumArgs = lua_gettop( L );
+
+        for(int bf=0; bf < std::min(NumArgs, 4); ++bf)
+            BlendFactors[bf] = ReadValueFromLua<Float32>( L, bf+1 );
+
+        auto *pContext = EngineObjectParserBase::LoadDeviceContextFromRegistry( L );
+        pContext->SetBlendFactors( BlendFactors );
+
+        // Return no values to Lua
+        return 0;
+    }
+
+    int DeviceContextFuncBindings::CommitShaderResources( lua_State *L )
+    {
+        auto NumArgs = lua_gettop( L );
+        IShaderResourceBinding *pShaderResBinding = nullptr;
+        int CurrArg = 1;
+        if(NumArgs >= CurrArg )
+        {
+            if( lua_type( L, CurrArg ) == LUA_TUSERDATA )
+            {
+                pShaderResBinding = *GetUserData<IShaderResourceBinding**>( L, CurrArg, m_ShaderResBindingMetatableName.c_str() );
+                ++CurrArg;
+            }
+        }
+
+        auto *pContext = EngineObjectParserBase::LoadDeviceContextFromRegistry( L );
+        pContext->CommitShaderResources( pShaderResBinding );
 
         return 0;
     }

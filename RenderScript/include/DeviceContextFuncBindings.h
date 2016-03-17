@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace Diligent
     class DeviceContextFuncBindings
     {
     public:
-        DeviceContextFuncBindings( IRenderDevice *pRenderDevice, lua_State *L, class TextureViewParser *pTexViewPasrser );
+        DeviceContextFuncBindings( IRenderDevice *pRenderDevice, lua_State *L, class TextureViewParser *pTexViewPasrser, class ShaderResourceBindingParser *pSRBParser );
 
     private:
         int SetRenderTargets( lua_State * );
@@ -44,6 +44,16 @@ namespace Diligent
         int ClearDepthStencil( lua_State * );
         ClassMethodCaller<DeviceContextFuncBindings> m_ClearDepthStencilBinding;
 
+        int SetStencilRef( lua_State * );
+        ClassMethodCaller<DeviceContextFuncBindings> m_SetStencilRefBinding;
+
+        int SetBlendFactors( lua_State * );
+        ClassMethodCaller<DeviceContextFuncBindings> m_SetBlendFactorsBinding;
+
+        int CommitShaderResources( lua_State * );
+        ClassMethodCaller<DeviceContextFuncBindings> m_CommitShaderResourcesBinding;
+
         String m_TexViewMetatableName;
+        String m_ShaderResBindingMetatableName;
     };
 }

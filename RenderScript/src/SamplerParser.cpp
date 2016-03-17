@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,6 +39,12 @@ namespace Diligent
         DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_COMPARISON_POINT );
         DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_COMPARISON_LINEAR );
         DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_COMPARISON_ANISOTROPIC );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MINIMUM_POINT );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MINIMUM_LINEAR );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MINIMUM_ANISOTROPIC );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MAXIMUM_POINT );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MAXIMUM_LINEAR );
+        DEFINE_ENUM_ELEMENT_MAPPING( m_FilterTypeEnumMapping, FILTER_TYPE_MAXIMUM_ANISOTROPIC );
         VERIFY( m_FilterTypeEnumMapping.m_Str2ValMap.size() == FILTER_TYPE_NUM_FILTERS - 1, "Unexpected map size. Did you update FILTER_TYPE enum?" );
         VERIFY( m_FilterTypeEnumMapping.m_Val2StrMap.size() == FILTER_TYPE_NUM_FILTERS - 1, "Unexpected map size. Did you update FILTER_TYPE enum?" );
         DEFINE_ENUM_BINDER( m_Bindings, SSamDescWrapper, MinFilter, FILTER_TYPE, m_FilterTypeEnumMapping )

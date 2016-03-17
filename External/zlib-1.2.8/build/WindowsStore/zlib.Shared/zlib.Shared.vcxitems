@@ -46,4 +46,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\uncompr.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\zutil.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)..\..\..\CMakeLists.txt" />
+  </ItemGroup>
 </Project>

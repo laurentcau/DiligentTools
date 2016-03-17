@@ -83,4 +83,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\..\libtiff\tif_config.h-vms" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)..\..\..\CMakeLists.txt" />
+  </ItemGroup>
 </Project>

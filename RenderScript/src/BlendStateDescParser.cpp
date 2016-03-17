@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@
  */
 
 #include "pch.h"
-#include "BlendStateParser.h"
+#include "BlendStateDescParser.h"
+#include "LuaWrappers.h"
+#include "ClassMethodBinding.h"
+
 
 namespace std 
 {
@@ -33,10 +36,10 @@ namespace std
 
 namespace Diligent
 {
-    class RenderTargetBlendStateParser;
+    class RenderTargetBlendDescArrayParser;
 
     template<>
-    class MemberBinder<RenderTargetBlendStateParser> : public MemberBinderBase
+    class MemberBinder<RenderTargetBlendDescArrayParser> : public MemberBinderBase
     {
     public:
         MemberBinder( size_t MemberOffset, size_t Dummy ) :
@@ -126,71 +129,26 @@ namespace Diligent
         EnumMapping < BLEND_OPERATION > m_BlendOpEnumMapping;
         EnumMapping < COLOR_MASK > m_ColorMaskEnumMapping;
     };
+    
 
-
-    const Char* BlendStateParser::BlendStateLibName = "BlendState";
-
-    BlendStateParser::BlendStateParser( IRenderDevice *pRenderDevice, lua_State *L ) :
-        EngineObjectParserCommon<IBlendState>( pRenderDevice, L, BlendStateLibName ),
-        m_SetBlendBinding( this, L, "Context", "SetBlendState", &BlendStateParser::SetBlendState )
+    MemberBinder<BlendStateDesc> :: MemberBinder( size_t MemberOffset, size_t Dummy ) :
+        MemberBinderBase( MemberOffset )
     {
-        DEFINE_BUFFERED_STRING_BINDER( m_Bindings, SBSDescWrapper, Name, NameBuffer )
+        DEFINE_BINDER( m_Bindings, BlendStateDesc, AlphaToCoverageEnable, Bool, Validator<Bool>() )
+        DEFINE_BINDER( m_Bindings, BlendStateDesc, IndependentBlendEnable, Bool, Validator<Bool>() )
 
-        DEFINE_BINDER( m_Bindings, SBSDescWrapper, AlphaToCoverageEnable, Bool, Validator<Bool>() )
-        DEFINE_BINDER( m_Bindings, SBSDescWrapper, IndependentBlendEnable, Bool, Validator<Bool>() )
-
-        DEFINE_BINDER( m_Bindings, SBSDescWrapper, RenderTargets, RenderTargetBlendStateParser, 0 )
-    };
-
-    void BlendStateParser::CreateObj( lua_State *L )
-    {
-        INIT_LUA_STACK_TRACKING( L );
-
-        SBSDescWrapper BlendDesc;
-        ParseLuaTable( L, 1, &BlendDesc, m_Bindings );
-
-        CHECK_LUA_STACK_HEIGHT();
-
-        auto ppBlendState = reinterpret_cast<IBlendState**>(lua_newuserdata( L, sizeof( IBlendState* ) ));
-        *ppBlendState = nullptr;
-        m_pRenderDevice->CreateBlendState( BlendDesc, ppBlendState );
-        if( *ppBlendState == nullptr )
-            SCRIPT_PARSING_ERROR( L, "Failed to create blend state object" )
-
-        CHECK_LUA_STACK_HEIGHT( +1 );
+        DEFINE_BINDER( m_Bindings, BlendStateDesc, RenderTargets, RenderTargetBlendDescArrayParser, 0 )
     }
 
-    int BlendStateParser::SetBlendState( lua_State *L )
+    void MemberBinder<BlendStateDesc> ::GetValue(lua_State *L, const void* pBasePointer)
     {
-        auto *pBS = *GetUserData<IBlendState**>( L, 1, m_MetatableRegistryName.c_str() );
-        
-        auto NumArgs = lua_gettop( L );
-        float BlendFactors[4] = { 1, 1, 1, 1 };
-        if( NumArgs >= 2 )
-        {
-            INIT_LUA_STACK_TRACKING( L );
+        const auto &BlendDesc = GetMemberByOffest< BlendStateDesc >(pBasePointer, m_MemberOffset);
+        PushLuaTable(L, &BlendDesc, m_Bindings);
+    }
 
-            ParseLuaArray( L, 2, BlendFactors, [&]( void* _pBasePointer, int StackIndex, int NewArrayIndex )
-            {
-                VERIFY( BlendFactors == _pBasePointer, "Sanity check" );
-                if( !(NewArrayIndex >= 1 && NewArrayIndex <= 4) )
-                    SCRIPT_PARSING_ERROR( L, "Incorrect blend factor index ", NewArrayIndex, ". Only 1..4 are allowed." );
-                
-                BlendFactors[NewArrayIndex - 1] = ReadValueFromLua<Float32>( L, StackIndex );
-            }
-            );
-
-            CHECK_LUA_STACK_HEIGHT();
-        }
-
-        Uint32 SampleMask = 0xFFFFFFFF;
-        if( NumArgs >= 3 )
-        {
-            SampleMask = ReadValueFromLua<Uint32>( L, 3 );
-        }
-
-        auto *pContext = LoadDeviceContextFromRegistry( L );
-        pContext->SetBlendState( pBS, BlendFactors, SampleMask );
-        return 0;
+    void MemberBinder<BlendStateDesc> ::SetValue(lua_State *L, int Index, void* pBasePointer)
+    {
+        auto &BlendDesc = GetMemberByOffest< BlendStateDesc>( pBasePointer, m_MemberOffset );
+        ParseLuaTable( L, Index, &BlendDesc, m_Bindings );
     }
 }

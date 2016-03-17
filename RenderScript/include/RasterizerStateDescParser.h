@@ -23,41 +23,28 @@
 
 #pragma once
 
-#include "LuaWrappers.h"
+#include "PipelineState.h"
 #include "LuaBindings.h"
-#include "EngineObjectParserCommon.h"
-#include "ClassMethodBinding.h"
 
-namespace std
+namespace std 
 {
-    DEFINE_ENUM_HASH( Diligent::BUFFER_VIEW_TYPE )
+    DEFINE_ENUM_HASH( Diligent::FILL_MODE )
+    DEFINE_ENUM_HASH( Diligent::CULL_MODE )
 }
 
 namespace Diligent
 {
-    class BufferViewParser : public EngineObjectParserCommon<IBufferView>
+    template<>
+    class MemberBinder<RasterizerStateDesc> : public MemberBinderBase
     {
     public:
-        BufferViewParser( class BufferParser *pBufParser, IRenderDevice *pRenderDevice, lua_State *L );
-        static const Char *BufferViewLibName;
-
-    protected:
-        virtual void CreateObj( lua_State *L );
-
+        MemberBinder( size_t MemberOffset, size_t Dummy ) ;
+        virtual void GetValue( lua_State *L, const void* pBasePointer )override;
+        virtual void SetValue( lua_State *L, int Index, void* pBasePointer )override;
     private:
-        // BufferViewDesc structure does not provide storage for the Name field.
-        // We need to use ObjectDescWrapper<> to be able to store the field.
-        typedef ObjectDescWrapper<BufferViewDesc> SBuffViewDescWrapper;
+        BindingsMapType m_Bindings;
 
-        const String m_BufferLibMetatableName;
-
-        ClassMethodCaller<BufferViewParser> m_CreateViewBinding;
-        int CreateView( lua_State *L );
-
-        ClassMethodCaller<BufferViewParser> m_GetDefaultViewBinding;
-        int GetDefaultView( lua_State * );
-
-        EnumMapping<BUFFER_VIEW_TYPE>    m_ViewTypeEnumMapping;
-        EnumMemberBinder<BUFFER_VIEW_TYPE> m_ViewTypeParser;
+        EnumMapping < FILL_MODE > m_FillModeEnumMapping;
+        EnumMapping < CULL_MODE > m_CullModeEnumMapping;
     };
 }

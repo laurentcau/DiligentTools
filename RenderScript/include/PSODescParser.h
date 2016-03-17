@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,34 +27,30 @@
 #include "LuaBindings.h"
 #include "EngineObjectParserCommon.h"
 #include "ClassMethodBinding.h"
-
-
-namespace std 
-{
-    DEFINE_ENUM_HASH( Diligent::FILL_MODE )
-    DEFINE_ENUM_HASH( Diligent::CULL_MODE )
-}
+#include "PipelineState.h"
 
 namespace Diligent
 {
-    class RasterizerStateParser : public EngineObjectParserCommon<IRasterizerState>
+    class PSODescParser : public EngineObjectParserCommon<IPipelineState>
     {
     public:
-        RasterizerStateParser( IRenderDevice *pRenderDevice, lua_State *L );
-        static const Char* RasterizerStateLibName;
+        PSODescParser( IRenderDevice *pRenderDevice, lua_State *L );
+        static const Char* PSODescLibName;
 
     protected:
         virtual void CreateObj( lua_State *L );
    
     private:
-        // RasterizerStateDesc structure does not provide storage for the Name field.
+        // PipelineStateDesc structure does not provide storage for the Name field.
         // We need to use ObjectDescWrapper<> to be able to store the field.
-        typedef ObjectDescWrapper<RasterizerStateDesc> SRSDescWrapper;
+        struct PSODescWrapper : PipelineStateDesc
+        {
+            String NameBuffer;
+            std::vector<LayoutElement> LayoutElementsBuffer;
+        };
+        friend class MemberBinder<GraphicsPipelineDesc>;
 
-        int SetRasterizerState( lua_State *L );
-        ClassMethodCaller<RasterizerStateParser> m_SetRasterizerBinding;
-
-        EnumMapping < FILL_MODE > m_FillModeEnumMapping;
-        EnumMapping < CULL_MODE > m_CullModeEnumMapping;
+        int SetPSO( lua_State *L );
+        ClassMethodCaller<PSODescParser> m_SetPSOBinding;
     };
 }

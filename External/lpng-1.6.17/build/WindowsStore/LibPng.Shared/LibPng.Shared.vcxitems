@@ -41,4 +41,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\pngwtran.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\pngwutil.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)..\..\..\CMakeLists.txt" />
+  </ItemGroup>
 </Project>

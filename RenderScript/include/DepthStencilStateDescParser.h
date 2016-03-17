@@ -1,4 +1,4 @@
-/*     Copyright 2015 Egor Yusov
+/*     Copyright 2015-2016 Egor Yusov
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,29 +23,21 @@
 
 #pragma once
 
-#include "LuaWrappers.h"
+#include "PipelineState.h"
 #include "LuaBindings.h"
-#include "EngineObjectParserCommon.h"
-#include "ClassMethodBinding.h"
-
+#include "EnumMappings.h"
 
 namespace Diligent
 {
-    class BlendStateParser : public EngineObjectParserCommon<IBlendState>
+    template<>
+    class MemberBinder<DepthStencilStateDesc> : public MemberBinderBase
     {
     public:
-        BlendStateParser( IRenderDevice *pRenderDevice, lua_State *L );
-        static const Char* BlendStateLibName;
-
-    protected:
-        virtual void CreateObj( lua_State *L );
-   
+        MemberBinder( size_t MemberOffset, size_t Dummy ) ;
+        virtual void GetValue( lua_State *L, const void* pBasePointer )override;
+        virtual void SetValue( lua_State *L, int Index, void* pBasePointer )override;
     private:
-        // BlendStateDesc structure does not provide storage for the Name field.
-        // We need to use ObjectDescWrapper<> to be able to store the field.
-        typedef ObjectDescWrapper<BlendStateDesc> SBSDescWrapper;
-
-        int SetBlendState( lua_State *L );
-        ClassMethodCaller<BlendStateParser> m_SetBlendBinding;
+        BindingsMapType m_Bindings;
+        ComparisonFuncEnumMapping          m_CmpFuncEnumMapping;
     };
 }

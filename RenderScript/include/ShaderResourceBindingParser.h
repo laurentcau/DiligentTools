@@ -29,30 +29,41 @@
 #include "ClassMethodBinding.h"
 #include "EngineObjectParserCommon.h"
 
-namespace std
-{
-    DEFINE_ENUM_HASH( Diligent::FILTER_TYPE )
-    DEFINE_ENUM_HASH( Diligent::TEXTURE_ADDRESS_MODE )
-}
-
 namespace Diligent
 {
-    class SamplerParser : public EngineObjectParserCommon<ISampler>
+    class ShaderResourceBindingParser : public EngineObjectParserBase
     {
     public:
-        SamplerParser( IRenderDevice *pRenderDevice, lua_State *L );
-        static const Char* SamplerLibName;
+        ShaderResourceBindingParser( IRenderDevice *pRenderDevice, lua_State *L,
+                                     const String &PSOLibMetatableName,
+                                     const String &ResMappingMetatableName,
+                                     const String &ShaderVarMetatableRegistryName);
+        static const Char* ShaderResourceBindingLibName;
+
+        virtual void GetObjectByName( lua_State *L, const Char *ShaderName, IShaderResourceBinding** ppObject );
 
     protected:
         virtual void CreateObj( lua_State *L );
+        virtual void DestroyObj( void *pData );
+        virtual void ReadField( lua_State *L, void *pData, const Char *Field );
+        virtual void UpdateField( lua_State *L, void *pData, const Char *Field );
+        virtual void PushExistingObject( lua_State *L, const void *pObject );
 
     private:
-        // SamplerDesc structure does not provide storage for the Name field.
-        // We need to use ObjectDescWrapper<> to be able to store the field.
-        typedef ObjectDescWrapper<SamplerDesc> SSamDescWrapper;
+        String m_PSOLibMetatableName;
+        String m_ResMappingMetatableName;
+        String m_ShaderVarMetatableRegistryName;
 
-        EnumMapping<FILTER_TYPE>           m_FilterTypeEnumMapping;
-        EnumMapping<TEXTURE_ADDRESS_MODE>  m_TexAddrModeEnumMapping;
-        ComparisonFuncEnumMapping          m_CmpFuncEnumMapping;
+        BindShaderResourcesFlagEnumMapping m_BindShaderResFlagEnumMapping;
+        ShaderTypeEnumMapping m_ShaderTypeEnumMapping;
+
+        int BindResources( lua_State *L );
+        ClassMethodCaller < ShaderResourceBindingParser > m_BindResourcesBinding;
+
+        int GetVariable( lua_State *L );
+        ClassMethodCaller < ShaderResourceBindingParser > m_GetVariableBinding;
+
+        int CreateShaderResourceBinding( lua_State *L );
+        ClassMethodCaller<ShaderResourceBindingParser> m_CreateShaderResourceBinding;
     };
 }

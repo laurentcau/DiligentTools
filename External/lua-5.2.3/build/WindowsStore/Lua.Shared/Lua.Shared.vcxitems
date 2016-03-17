@@ -77,4 +77,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\lvm.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\winappstubs.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)..\..\..\CMakeLists.txt" />
+  </ItemGroup>
 </Project>
