@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.6)
 
 file(RELATIVE_PATH DILIGENT_TOOLS_DIR "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+option(DILIGENT_NO_PNG "Disable PNG" OFF)
+
+if(${DILIGENT_NO_PNG})
+    set(DE_PNG FALSE CACHE INTERNAL "PNG is forcibly disabled")
+endif()
 
 if(PLATFORM_WIN32 OR PLATFORM_UNIVERSAL_WINDOWS OR PLATFORM_LINUX OR PLATFORM_MACOS OR PLATFORM_IOS)
     option(DILIGENT_INSTALL_TOOLS "Install DiligentTool module headers and libraries" ON)

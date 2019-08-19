@@ -34,7 +34,11 @@
 #include "Errors.hpp"
 
 #include "tiffio.h"
-#include "png.h"
+
+#ifdef DE_PNG
+#	include "png.h"
+#endif
+
 #include "PNGCodec.h"
 #include "JPEGCodec.h"
 
@@ -217,7 +221,7 @@ void Image::LoadTiffFile(IDataBlob* pFileData, const ImageLoadInfo& LoadInfo)
     TIFFClose(TiffFile);
 }
 
-
+#ifdef DE_PNG
 Image::Image(IReferenceCounters*  pRefCounters,
              IDataBlob*           pFileData,
              const ImageLoadInfo& LoadInfo) :
@@ -262,7 +266,7 @@ void Image::CreateFromDataBlob(IDataBlob*           pFileData,
     (*ppImage)->AddRef();
 }
 
-
+#ifdef DE_PNG
 static const std::array<Uint8, 4> GetRGBAOffsets(TEXTURE_FORMAT Format)
 {
     switch (Format)
@@ -327,6 +331,7 @@ void Image::Encode(const EncodeInfo& Info, IDataBlob** ppEncodedData)
     }
     else if (Info.FileFormat == IMAGE_FILE_FORMAT_PNG)
     {
+#ifdef DE_PNG
         const auto*        pData  = reinterpret_cast<const Uint8*>(Info.pData);
         auto               Stride = Info.Stride;
         std::vector<Uint8> ConvertedData;
@@ -340,6 +345,9 @@ void Image::Encode(const EncodeInfo& Info, IDataBlob** ppEncodedData)
         auto Res = EncodePng(pData, Info.Width, Info.Height, Stride, Info.KeepAlpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB, pEncodedData.RawPtr());
         if (Res != ENCODE_PNG_RESULT_OK)
             LOG_ERROR_MESSAGE("Failed to encode png file");
+#else
+		UNSUPPORTED("Png unsupported in this build");
+#endif
     }
     else
     {
