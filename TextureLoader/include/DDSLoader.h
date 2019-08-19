@@ -47,9 +47,6 @@
 
 #pragma once
 
-#include "RenderDevice.h"
-#include "Texture.h"
-
 void CreateDDSTextureFromMemory(
     Diligent::IRenderDevice* pDevice,
     const Diligent::Uint8*   ddsData,
