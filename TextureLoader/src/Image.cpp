@@ -34,7 +34,11 @@
 #include "Errors.hpp"
 
 #include "tiffio.h"
-#include "png.h"
+
+#ifdef DE_PNG
+#	include "png.h"
+#endif
+
 #include "jpeglib.h"
 
 #include "DataBlobImpl.hpp"
@@ -216,7 +220,7 @@ void Image::LoadTiffFile(IDataBlob* pFileData, const ImageLoadInfo& LoadInfo)
     TIFFClose(TiffFile);
 }
 
-
+#ifdef DE_PNG
 class PNGReadFnHelper
 {
 public:
@@ -340,6 +344,7 @@ void Image::LoadPngFile(IDataBlob* pFileData, const ImageLoadInfo& LoadInfo)
 
     png_destroy_read_struct(&png, &info, (png_infopp)0);
 }
+#endif //DE_PNG
 
 
 
@@ -501,7 +506,7 @@ void Image::CreateFromDataBlob(IDataBlob*           pFileData,
     (*ppImage)->AddRef();
 }
 
-
+#ifdef DE_PNG
 static void WritePng(const Uint8* pData, Uint32 Width, Uint32 Height, Uint32 Stride, int PngColorType, IDataBlob* pEncodedData)
 {
     struct PngWrapper
@@ -548,6 +553,7 @@ static void WritePng(const Uint8* pData, Uint32 Width, Uint32 Height, Uint32 Str
     png_set_write_fn(Png.strct, pEncodedData, PngWriteCallback, NULL);
     png_write_png(Png.strct, Png.info, PNG_TRANSFORM_IDENTITY, NULL);
 }
+#endif //DE_PNG
 
 static void WriteJPEG(JSAMPLE* pRGBData, Uint32 Width, Uint32 Height, int quality, IDataBlob* pEncodedData)
 {
@@ -708,6 +714,7 @@ void Image::Encode(const EncodeInfo& Info, IDataBlob** ppEncodedData)
     }
     else if (Info.FileFormat == EImageFileFormat::png)
     {
+#ifdef DE_PNG
         const auto*        pData  = reinterpret_cast<const Uint8*>(Info.pData);
         auto               Stride = Info.Stride;
         std::vector<Uint8> ConvertedData;
@@ -719,6 +726,9 @@ void Image::Encode(const EncodeInfo& Info, IDataBlob** ppEncodedData)
         }
 
         WritePng(pData, Info.Width, Info.Height, Stride, Info.KeepAlpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB, pEncodedData);
+#else
+		UNSUPPORTED("Png unsupported in this build");
+#endif
     }
     else
     {

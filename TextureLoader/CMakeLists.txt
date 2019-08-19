@@ -44,10 +44,16 @@ PRIVATE
     Diligent-GraphicsEngineInterface 
     Diligent-GraphicsAccessories
     LibJpeg 
-    LibPng 
     LibTiff 
-    ZLib
 )
+
+if (DE_PNG)
+	target_link_libraries(Diligent-TextureLoader 
+	PRIVATE 
+		LibPng 
+		ZLib
+	)
+endif()
 
 set_target_properties(Diligent-TextureLoader PROPERTIES
     FOLDER DiligentTools
