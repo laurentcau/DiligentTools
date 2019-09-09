@@ -880,6 +880,11 @@ static void FillInitData(
                     twidth = w;
                     theight = h;
                     tdepth = d;
+					if (DXGI_FORMAT_BC1_TYPELESS <= format && format <= DXGI_FORMAT_BC5_SNORM) // minimum size of compressed texture is 4 pixels
+					{
+						twidth = std::max<size_t>(twidth, 4);
+						theight = std::max<size_t>(theight, 4);
+					}
                 }
 
                 VERIFY_EXPR(index < mipCount * arraySize);
