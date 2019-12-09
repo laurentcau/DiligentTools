@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <array>
+#include <setjmp.h> 
 
 #include "Image.hpp"
 #include "Errors.hpp"
