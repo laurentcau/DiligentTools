@@ -390,13 +390,20 @@ void Image::LoadJpegFile(IDataBlob* pFileData, const ImageLoadInfo& LoadInfo)
     cinfo.err           = jpeg_std_error(&jerr.pub);
     jerr.pub.error_exit = my_error_exit;
     // Establish the setjmp return context for my_error_exit to use.
-    if (setjmp(jerr.setjmp_buffer))
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning ( disable: 4611 ) // ingore warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
+#endif
+    if(setjmp(jerr.setjmp_buffer))
     {
         // If we get here, the JPEG code has signaled an error.
         // We need to clean up the JPEG object, close the input file, and return.
         jpeg_destroy_decompress(&cinfo);
         LOG_ERROR_AND_THROW("Failed to decompress JPEG image");
     }
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     // Now we can initialize the JPEG decompression object.
     jpeg_create_decompress(&cinfo);
 
