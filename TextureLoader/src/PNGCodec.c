@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef DE_PNG
 
 #include "png.h"
 #include "GraphicsTypes.h"
@@ -242,3 +243,5 @@ ENCODE_PNG_RESULT Diligent_EncodePng(const Uint8* pSrcPixels,
 
     return ENCODE_PNG_RESULT_OK;
 }
+
+#endif //DE_PNG

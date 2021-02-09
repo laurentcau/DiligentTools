@@ -29,7 +29,7 @@
 
 #include <algorithm>
 #include <array>
-#include <setjmp.h> 
+
 
 #include "Image.h"
 #include "Errors.hpp"
@@ -37,7 +37,7 @@
 #include "tiffio.h"
 
 #ifdef DE_PNG
-#	include "png.h"
+#include "png.h"
 #endif
 
 #include "PNGCodec.h"
@@ -222,7 +222,7 @@ void Image::LoadTiffFile(IDataBlob* pFileData, const ImageLoadInfo& LoadInfo)
     TIFFClose(TiffFile);
 }
 
-#ifdef DE_PNG
+
 Image::Image(IReferenceCounters*  pRefCounters,
              IDataBlob*           pFileData,
              const ImageLoadInfo& LoadInfo) :
@@ -267,7 +267,7 @@ void Image::CreateFromDataBlob(IDataBlob*           pFileData,
     (*ppImage)->AddRef();
 }
 
-#ifdef DE_PNG
+
 static const std::array<Uint8, 4> GetRGBAOffsets(TEXTURE_FORMAT Format)
 {
     switch (Format)
