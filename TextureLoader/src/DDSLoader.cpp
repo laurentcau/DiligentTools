@@ -949,6 +949,7 @@ static void CreateTexture(
     _In_ bool forceSRGB,
     _In_ bool isCubeMap,
     _In_ TextureSubResData* initData,
+    _In_ bool forceArray,
     _Outptr_opt_ ITexture** texture
     )
 {
@@ -982,7 +983,7 @@ static void CreateTexture(
     {
         case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
             {
-                desc.Type = arraySize > 1 ? RESOURCE_DIM_TEX_1D_ARRAY : RESOURCE_DIM_TEX_1D;
+                desc.Type = (arraySize > 1 || forceArray) ? RESOURCE_DIM_TEX_1D_ARRAY : RESOURCE_DIM_TEX_1D;
                 pDevice->CreateTexture( desc, &InitData, texture );
                 
             //    ID3D11Texture1D* tex = nullptr;
@@ -1032,8 +1033,8 @@ static void CreateTexture(
         case D3D11_RESOURCE_DIMENSION_TEXTURE2D:
             {
                 desc.Type = isCubeMap ?
-                    (arraySize/6 > 1 ? RESOURCE_DIM_TEX_CUBE_ARRAY : RESOURCE_DIM_TEX_CUBE) : 
-                    (arraySize > 1 ? RESOURCE_DIM_TEX_2D_ARRAY : RESOURCE_DIM_TEX_2D);
+                    ((arraySize/6 > 1  || forceArray) ? RESOURCE_DIM_TEX_CUBE_ARRAY : RESOURCE_DIM_TEX_CUBE) : 
+                    ((arraySize > 1  || forceArray) ? RESOURCE_DIM_TEX_2D_ARRAY : RESOURCE_DIM_TEX_2D);
                 desc.Height = static_cast<Uint32>(height);
 
                 //if (isCubeMap)
@@ -1169,7 +1170,8 @@ static void CreateTextureFromDDS(
     _In_ CPU_ACCESS_FLAGS cpuAccessFlags,
     _In_ MISC_TEXTURE_FLAGS miscFlags,
     _In_ bool forceSRGB,
-    _Outptr_opt_ ITexture** texture
+    _Outptr_opt_ ITexture** texture,
+    _In_ bool forceArray
     )
 {
     size_t width = header->width;
@@ -1334,7 +1336,7 @@ static void CreateTextureFromDDS(
     size_t tdepth = 0;
     FillInitData(width, height, depth, mipCount, arraySize, format, maxsize, bitSize, bitData, twidth, theight, tdepth, skipMip, initData.get());
 
-    CreateTexture(pDevice, resDim, twidth, theight, tdepth, mipCount - skipMip, arraySize, format, usage, name, bindFlags, cpuAccessFlags, miscFlags, forceSRGB, isCubeMap, initData.get(), texture/*, textureView*/);
+    CreateTexture(pDevice, resDim, twidth, theight, tdepth, mipCount - skipMip, arraySize, format, usage, name, bindFlags, cpuAccessFlags, miscFlags, forceSRGB, isCubeMap, initData.get(), forceArray, texture/*, textureView*/);
 
 #if 0
     if (FAILED(hr) && !maxsize && (mipCount > 1))
@@ -1438,8 +1440,9 @@ void CreateDDSTextureFromMemoryEx(
     CPU_ACCESS_FLAGS cpuAccessFlags,
     MISC_TEXTURE_FLAGS miscFlags,
     bool forceSRGB,
-    ITexture** texture/*,
-    D2D1_ALPHA_MODE* alphaMode*/
+    ITexture** texture,
+    bool forceArray
+    /*,D2D1_ALPHA_MODE* alphaMode*/
     )
 {
     if (texture)
@@ -1498,7 +1501,7 @@ void CreateDDSTextureFromMemoryEx(
 
     ptrdiff_t offset = sizeof(Uint32) + sizeof(DDS_HEADER) + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0);
 
-    CreateTextureFromDDS(pDevice, header, ddsData + offset, ddsDataSize - offset, maxsize, usage, name, bindFlags, cpuAccessFlags, miscFlags, forceSRGB, texture/*, textureView*/);
+    CreateTextureFromDDS(pDevice, header, ddsData + offset, ddsDataSize - offset, maxsize, usage, name, bindFlags, cpuAccessFlags, miscFlags, forceSRGB, texture/*, textureView*/, forceArray);
 
     //if (alphaMode)
     //    *alphaMode = GetAlphaMode(header);

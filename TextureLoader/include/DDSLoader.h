@@ -67,6 +67,7 @@ void CreateDDSTextureFromMemoryEx(
     Diligent::CPU_ACCESS_FLAGS   cpuAccessFlags,
     Diligent::MISC_TEXTURE_FLAGS miscFlags,
     bool                         forceSRGB,
-    Diligent::ITexture**         texture /*,
-    D2D1_ALPHA_MODE* alphaMode*/
+    Diligent::ITexture** texture,
+    bool forceArray = false
+    /*, D2D1_ALPHA_MODE* alphaMode*/
 );
