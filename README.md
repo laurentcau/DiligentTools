@@ -3,8 +3,8 @@
 This module implements additional functionality on top of the [Diligent Engine](https://github.com/DiligentGraphics/DiligentEngine)'s core module
 and contains the following libraries:
 
-* [Texture loader](TextureLoader): a texture loading libary. The following formats are currently supported: jpg, png, tiff, dds, ktx.
-* [Asset Loader](AssetLoader): an asset loading libary. The library currently supports GLTF 2.0.
+* [Texture loader](TextureLoader): a texture loading library. The following formats are currently supported: jpg, png, tiff, dds, ktx.
+* [Asset Loader](AssetLoader): an asset loading library. The library currently supports GLTF 2.0.
   * To enable Draco compression, download [Draco repository](https://github.com/google/draco) and include it into
     your project. Make sure that Draco source folder is processed by CMake *before* DiligentTools folder.
     Alternatively, you can specify a path to the Draco installation folder using `DRACO_PATH` CMake variable.
@@ -21,6 +21,7 @@ To build the module, see [build instructions](https://github.com/DiligentGraphic
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/DiligentGraphics/DiligentTools?svg=true)](https://ci.appveyor.com/project/DiligentGraphics/diligenttools)
 [![Build Status](https://travis-ci.org/DiligentGraphics/DiligentTools.svg?branch=master)](https://travis-ci.org/DiligentGraphics/DiligentTools)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c67b3cb18bd44720a69360b4f83ad070)](https://www.codacy.com/manual/DiligentGraphics/DiligentTools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DiligentGraphics/DiligentTools&amp;utm_campaign=Badge_Grade)
+[![Lines of Code](https://tokei.rs/b1/github.com/DiligentGraphics/DiligentTools)](https://github.com/DiligentGraphics/DiligentTools)
 
 # License
 
@@ -47,7 +48,7 @@ In submitting any content to this repository,
 and you agree that the content is free of any Intellectual Property claims and you have the right to license it under those terms. 
 
 Diligent Engine uses [clang-format](https://clang.llvm.org/docs/ClangFormat.html) to ensure
-consistent source code style throught the code base. The format is validated by appveyor and travis
+consistent source code style throughout the code base. The format is validated by appveyor and travis
 for each commit and pull request, and the build will fail if any code formatting issue is found. Please refer
 to [this page](https://github.com/DiligentGraphics/DiligentCore/blob/master/doc/code_formatting.md) for instructions
 on how to set up clang-format and automatic code formatting.
